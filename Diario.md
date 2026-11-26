@@ -1,26 +1,30 @@
 # Diário de Desenvolvimento — Cyber-Rescue
 
-## Sessão 2 — 26 de novembro de 2026
+## Sessão 1 — 26 de novembro de 2026
 
 ### Objetivo
-Configurar as regras do projeto para o assistente de IA e garantir que o ficheiro `CLAUDE.md` nunca é enviado para o GitHub.
+Criar o repositório do projeto, configurar os ficheiros a ignorar e montar a estrutura inicial do jogo em Phaser v4, com cenas base e placeholders geométricos para testar no browser.
 
 ### Atividades realizadas
-- Criação do `.gitignore` para manter ficheiros locais fora do repositório.
-- Criação do ficheiro local de regras do projeto com a arquitetura técnica (Phaser v4, ES6 Modules, Arcade Physics sem gravidade), o tema (Fusão Sensorial / Fog of War e Autonomia Partilhada com FSM PATROL, EXTINGUISH, ASSIST), as cenas obrigatórias, as classes modulares em `src/classes/` e o fluxo de trabalho.
+- Criação do repositório e do `.gitignore` (documentos locais da proposta e ficheiros PDF/DOCX ficam fora do repositório).
+- Criação da estrutura de pastas: `src/scenes`, `src/classes`, `assets/images`, `assets/maps`, `assets/audio`.
+- `index.html` com Phaser 4.2.1 via CDN e carregamento de `src/main.js` como ES6 Module.
+- `src/main.js` com resolução 800x600, `Phaser.Scale.FIT` e Arcade Physics sem gravidade.
+- `MenuScene` (título, instruções e botão JOGAR), `GameScene` (mapa de teste com paredes, jogador com WASD/Setas e colisões, drone placeholder a patrulhar) e `GameOverScene` (pontuação e botão Jogar Novamente).
 
 ### Problemas
-- O `Diario.md` estava vazio no diretório de trabalho (a versão commitada continha apenas um carácter solto), pelo que não havia estrutura anterior para replicar.
+- Ainda não existem sprites, mapas nem lógica de jogo definitiva, pelo que o fluxo de cenas só pode ser testado com dados provisórios.
 
 ### Soluções
-- Foi definida uma estrutura base (Data, Objetivo, Atividades, Problemas, Soluções, Decisões, Declaração de Utilização de IA) a seguir nas sessões futuras.
+- Utilização de formas geométricas (retângulos e círculos) como placeholders temporários, com pontuação de teste e tecla ESC para chegar ao ecrã de fim de jogo.
 
 ### Decisões
-- Manter o ficheiro de regras apenas local, ignorado pelo Git.
-- Usar o nome de ficheiro existente `Diario.md`.
+- Usar ES6 Modules e Arcade Physics sem gravidade (vista de cima).
+- Fixar a versão do Phaser (4.2.1) no CDN para evitar alterações inesperadas.
+- Deixar as classes (`Rescuer`, `SmartDrone`, `Victim`, `HazardFire`, `FogOfWar`, `HUD`) para sessões seguintes, após validar a estrutura base.
 
 ### Declaração de Utilização de IA
 - **Ferramenta usada:** Claude Code (modelo Sonnet 5.5).
-- **Finalidade:** criar o `.gitignore`, o ficheiro local de regras e esta entrada do diário.
-- **Resultado:** ficheiros criados conforme as instruções fornecidas.
-- **Decisões tomadas:** o conteúdo foi revisto e aceite pelo autor; a estrutura do diário foi definida de raiz por não existir histórico utilizável.
+- **Finalidade:** configurar o `.gitignore`, gerar a estrutura de pastas e os ficheiros base em Phaser v4, e redigir esta entrada do diário.
+- **Resultado:** estrutura inicial funcional com três cenas e placeholders, pronta a testar no browser.
+- **Decisões tomadas:** o código gerado foi revisto e aceite pelo autor; as funcionalidades específicas do jogo serão desenvolvidas de forma incremental.
