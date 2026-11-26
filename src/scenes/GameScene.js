@@ -1,4 +1,10 @@
 // Cena principal do jogo (mapa de teste com placeholders)
+import Rescuer from '../classes/Rescuer.js';
+import SmartDrone from '../classes/SmartDrone.js';
+import Victim from '../classes/Victim.js';
+import HazardFire from '../classes/HazardFire.js';
+import HUD from '../classes/HUD.js';
+
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super('GameScene');
@@ -6,6 +12,8 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     this.pontuacao = 0;
+    this.salvas = 0;
+    this.terminado = false;
 
     // Paredes (retângulos estáticos): bordas e alguns obstáculos
     this.paredes = this.physics.add.staticGroup();
@@ -19,60 +27,60 @@ export default class GameScene extends Phaser.Scene {
       this.paredes.add(parede);
     });
 
-    // Jogador (placeholder: quadrado azul)
-    this.jogador = this.add.rectangle(80, 520, 28, 28, 0x4299e1);
-    this.physics.add.existing(this.jogador);
-    this.jogador.body.setCollideWorldBounds(true);
+    // Vítimas e focos de fogo (posições de teste)
+    this.vitimas = [[120, 300], [400, 150], [650, 200], [400, 450], [680, 500]]
+      .map(([x, y]) => new Victim(this, x, y));
+    this.fogos = [[200, 470], [400, 380], [620, 150], [460, 100], [150, 200]]
+      .map(([x, y]) => new HazardFire(this, x, y));
+    this.totalVitimas = this.vitimas.length;
+
+    // Jogador e drone (o drone voa, por isso não colide com paredes)
+    this.jogador = new Rescuer(this, 80, 520);
     this.physics.add.collider(this.jogador, this.paredes);
+    this.drone = new SmartDrone(this, 120, 60, [
+      new Phaser.Math.Vector2(120, 60),
+      new Phaser.Math.Vector2(680, 60),
+      new Phaser.Math.Vector2(680, 540),
+      new Phaser.Math.Vector2(120, 540)
+    ]);
 
-    // Drone (placeholder: círculo ciano) que patrulha entre pontos
-    this.drone = this.add.circle(120, 80, 14, 0x4fd1c5);
-    this.physics.add.existing(this.drone);
-    this.pontosPatrulha = [
-      new Phaser.Math.Vector2(120, 80),
-      new Phaser.Math.Vector2(680, 80),
-      new Phaser.Math.Vector2(680, 500),
-      new Phaser.Math.Vector2(120, 500)
-    ];
-    this.indicePatrulha = 1;
-
-    // Controlos
-    this.cursores = this.input.keyboard.createCursorKeys();
-    this.teclas = this.input.keyboard.addKeys('W,A,S,D');
+    this.hud = new HUD(this);
     this.input.keyboard.once('keydown-ESC', () => this.terminar());
-
-    this.textoHUD = this.add.text(30, 28, '', {
-      fontFamily: 'monospace', fontSize: '16px', color: '#ffffff'
-    }).setDepth(10);
-
-    // Pontuação de teste: +10 por segundo
-    this.time.addEvent({ delay: 1000, loop: true, callback: () => { this.pontuacao += 10; } });
   }
 
-  update() {
-    // Movimento do jogador (normalizado para não andar mais depressa na diagonal)
-    const velocidade = 200;
-    let vx = 0;
-    let vy = 0;
-    if (this.cursores.left.isDown || this.teclas.A.isDown) vx = -1;
-    else if (this.cursores.right.isDown || this.teclas.D.isDown) vx = 1;
-    if (this.cursores.up.isDown || this.teclas.W.isDown) vy = -1;
-    else if (this.cursores.down.isDown || this.teclas.S.isDown) vy = 1;
-    const direcao = new Phaser.Math.Vector2(vx, vy).normalize().scale(velocidade);
-    this.jogador.body.setVelocity(direcao.x, direcao.y);
+  update(tempo, delta) {
+    if (this.terminado) return;
 
-    // Patrulha do drone
-    const alvo = this.pontosPatrulha[this.indicePatrulha];
-    if (Phaser.Math.Distance.Between(this.drone.x, this.drone.y, alvo.x, alvo.y) < 6) {
-      this.indicePatrulha = (this.indicePatrulha + 1) % this.pontosPatrulha.length;
-    } else {
-      this.physics.moveTo(this.drone, alvo.x, alvo.y, 120);
-    }
+    this.jogador.atualizar(tempo, delta);
+    this.drone.atualizar(tempo, delta, this.jogador, this.fogos);
 
-    this.textoHUD.setText(`Pontos: ${this.pontuacao}  |  Drone: PATROL  |  ESC: terminar`);
+    // Resgatar vítimas (tecla E)
+    this.pontuacao += this.jogador.tentarResgatar(this.vitimas);
+    this.vitimas = this.vitimas.filter((v) => v.active);
+    this.fogos = this.fogos.filter((f) => f.active);
+    this.salvas = this.totalVitimas - this.vitimas.length;
+
+    // Dano ao tocar num foco de incêndio
+    this.fogos.forEach((fogo) => {
+      const dist = Phaser.Math.Distance.Between(this.jogador.x, this.jogador.y, fogo.x, fogo.y);
+      if (dist < 14 + 20 * fogo.scaleX) this.jogador.receberDano(fogo.dano, tempo);
+    });
+
+    this.hud.atualizar({
+      pontos: this.pontuacao,
+      salvas: this.salvas,
+      restantes: this.vitimas.length,
+      saude: this.jogador.saude,
+      oxigenio: this.jogador.oxigenio,
+      estadoDrone: this.drone.estado
+    });
+
+    if (this.jogador.estaMorto() || this.vitimas.length === 0) this.terminar();
   }
 
   terminar() {
+    if (this.terminado) return;
+    this.terminado = true;
     this.scene.start('GameOverScene', { pontuacao: this.pontuacao });
   }
 }
