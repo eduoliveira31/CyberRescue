@@ -7,8 +7,12 @@ export default class FogOfWar {
     this.opacidadeMemoria = 0.55; // sombra nas áreas já visitadas
 
     this.criarTexturaLuz();
-    // Imagem usada só como "borracha" (nunca é adicionada à cena)
-    this.borracha = new Phaser.GameObjects.Image(scene, 0, 0, 'luz');
+    // Imagens usadas só como "borracha" (nunca são adicionadas à cena).
+    // Uma por fonte de visão: o Phaser v4 guarda a referência do objeto e só lê
+    // posição/escala em render(), por isso partilhar uma imagem fazia todos os
+    // círculos aparecerem na última posição (a do drone)
+    this.borrachaSocorrista = this.criarBorracha(this.raioSocorrista);
+    this.borrachaDrone = this.criarBorracha(this.raioDrone);
 
     // Camada 1: nevoeiro permanente. Começa totalmente preto e vai sendo apagado
     // nas zonas exploradas, que ficam a descoberto para sempre
@@ -38,27 +42,30 @@ export default class FogOfWar {
     tela.refresh();
   }
 
-  // Apaga um círculo de nevoeiro numa camada
-  apagarCirculo(camada, x, y, raio) {
-    this.borracha.setPosition(x, y).setScale((raio * 2) / 256);
-    camada.erase(this.borracha);
+  criarBorracha(raio) {
+    return new Phaser.GameObjects.Image(this.scene, 0, 0, 'luz').setScale((raio * 2) / 256);
+  }
+
+  // Apaga um círculo de nevoeiro numa camada; a posição vai no próprio comando
+  apagarCirculo(camada, borracha, x, y) {
+    camada.erase(borracha, x, y);
   }
 
   // Chamar a cada frame com as fontes de visão
   atualizar(socorrista, drone) {
     const fontes = [
-      [socorrista.x, socorrista.y, this.raioSocorrista],
-      [drone.x, drone.y, this.raioDrone]
+      [this.borrachaSocorrista, socorrista.x, socorrista.y],
+      [this.borrachaDrone, drone.x, drone.y]
     ];
 
-    // Explora permanentemente
-    fontes.forEach(([x, y, r]) => this.apagarCirculo(this.camadaOculta, x, y, r));
+    // Explora permanentemente (zonas já visitadas deixam de estar ocultas)
+    fontes.forEach(([b, x, y]) => this.apagarCirculo(this.camadaOculta, b, x, y));
     this.camadaOculta.render();
 
     // Sombra de memória com buracos onde se vê em tempo real
     this.camadaMemoria.clear();
     this.camadaMemoria.fill(0x000000, this.opacidadeMemoria);
-    fontes.forEach(([x, y, r]) => this.apagarCirculo(this.camadaMemoria, x, y, r));
+    fontes.forEach(([b, x, y]) => this.apagarCirculo(this.camadaMemoria, b, x, y));
     this.camadaMemoria.render();
   }
 

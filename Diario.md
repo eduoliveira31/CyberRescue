@@ -83,3 +83,28 @@ Implementar a Fusão Sensorial (Fog of War com telemetria partilhada pelo drone)
 - **Finalidade:** gerar a classe `FogOfWar` e integrá-la na `GameScene`.
 - **Resultado:** nevoeiro com visão partilhada, por testar no browser.
 - **Decisões tomadas:** o código foi revisto pelo autor; valores a ajustar após testes.
+
+## Sessão 4 — 26 de novembro de 2026
+
+### Objetivo
+Corrigir a visibilidade do Fog of War: o campo de visão do socorrista não acompanhava o jogador.
+
+### Atividades realizadas
+- Diagnóstico: o Phaser v4 guarda o comando de desenho com a referência do objeto e só lê posição e escala em `render()`. Como se reutilizava a mesma "borracha" para os dois círculos, ambos eram desenhados na última posição (a do drone).
+- Correção em `FogOfWar`: uma borracha por fonte de visão (socorrista e drone), com a posição passada no próprio comando `erase`.
+- A camada de memória continua a ser redesenhada a cada frame; só fica limpa dentro dos raios atuais, com sombra nas zonas já visitadas.
+
+### Problemas
+- Dois círculos de visão a partilharem o mesmo objeto temporário.
+
+### Soluções
+- Objetos independentes por fonte e coordenadas explícitas em cada `erase`.
+
+### Decisões
+- Manter a memória do mapa (zonas visitadas ficam sombreadas) em vez de voltarem a ficar totalmente ocultas.
+
+### Declaração de Utilização de IA
+- **Ferramenta usada:** Claude Code (modelo Sonnet 5.5).
+- **Finalidade:** diagnosticar o erro a partir do código-fonte do Phaser 4.2.1 e corrigir `FogOfWar`.
+- **Resultado:** correção aplicada, validada só por análise do código e verificação de sintaxe; falta confirmar no browser.
+- **Decisões tomadas:** correção revista pelo autor.
