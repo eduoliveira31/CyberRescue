@@ -108,3 +108,30 @@ Corrigir a visibilidade do Fog of War: o campo de visão do socorrista não acom
 - **Finalidade:** diagnosticar o erro a partir do código-fonte do Phaser 4.2.1 e corrigir `FogOfWar`.
 - **Resultado:** correção aplicada, validada só por análise do código e verificação de sintaxe; falta confirmar no browser.
 - **Decisões tomadas:** correção revista pelo autor.
+
+## Sessão 5 — 26 de novembro de 2026
+
+### Objetivo
+Criar dois níveis em grelha inspirados em Viana do Castelo e a progressão completa do jogo.
+
+### Atividades realizadas
+- `src/data/levels.js` com dois mapas 20x15 (tiles de 40 px): Nível 1 "ESTG - IPVC" (salas, corredores e átrio; 3 vítimas, 3 fogos) e Nível 2 "Centro Histórico / Praça da República" (quarteirões, vielas estreitas e praça central; 5 vítimas, 6 fogos, dano maior).
+- `GameScene` constrói paredes, jogador, drone, vítimas e fogos a partir dos dados; ao salvar todas as vítimas do Nível 1 mostra "Setor Limpo!" e avança para o Nível 2 mantendo a pontuação.
+- `HUD` mostra o nível atual; `GameOverScene` mostra "MISSÃO CONCLUÍDA" ou "FALHA NA MISSÃO", pontuação, vítimas salvas e reinício no Nível 1.
+
+### Problemas
+- Garantir que todas as posições de vítimas e fogos são acessíveis e não ficam dentro de paredes.
+
+### Soluções
+- Script de validação (fora do repositório) que confirma dimensões, células livres e acessibilidade por flood fill nos dois mapas.
+
+### Decisões
+- Paredes agrupadas por linha para reduzir o número de corpos físicos.
+- O socorrista começa cada nível com saúde e oxigénio cheios.
+- Os layouts são inspirados nos locais, não plantas fiéis.
+
+### Declaração de Utilização de IA
+- **Ferramenta usada:** Claude Code (modelo Sonnet 5.5).
+- **Finalidade:** desenhar os layouts, implementar a progressão de níveis e atualizar o HUD e a GameOverScene.
+- **Resultado:** dois níveis jogáveis com vitória e derrota, ainda por testar no browser.
+- **Decisões tomadas:** código revisto pelo autor; dificuldade a ajustar após testes.

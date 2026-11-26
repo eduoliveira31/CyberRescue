@@ -13,12 +13,14 @@ export default class HUD {
     this.textoEsq = scene.add.text(12, 6, '', estilo).setDepth(101);
     this.textoMeio = scene.add.text(480, 6, '', estilo).setDepth(101);
     this.textoDrone = scene.add.text(12, 24, '', estilo).setDepth(101);
-    this.textoAjuda = scene.add.text(788, 24, 'E: resgatar  F: chamar drone', {
+    this.textoNivel = scene.add.text(190, 24, '', { ...estilo, color: '#faf089' }).setDepth(101);
+    this.textoAjuda =scene.add.text(788, 24, 'E: resgatar  F: chamar drone', {
       ...estilo, fontSize: '12px', color: '#a0aec0'
     }).setOrigin(1, 0).setDepth(101);
   }
 
-  atualizar({ pontos, salvas, restantes, saude, oxigenio, estadoDrone }) {
+  atualizar({ pontos, salvas, restantes, saude, oxigenio, estadoDrone, nivel }) {
+    this.textoNivel.setText(nivel || '');
     this.textoEsq.setText(`Pontos: ${pontos}  Vítimas: ${salvas} salvas / ${restantes} restantes`);
     this.textoMeio.setText(`Saúde: ${Math.ceil(saude)}  Oxigénio: ${Math.ceil(oxigenio)}`);
     this.textoDrone.setText(`Drone: ${estadoDrone}`).setColor(COR_ESTADO[estadoDrone] || '#ffffff');
