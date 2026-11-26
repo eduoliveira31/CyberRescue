@@ -4,6 +4,7 @@ import SmartDrone from '../classes/SmartDrone.js';
 import Victim from '../classes/Victim.js';
 import HazardFire from '../classes/HazardFire.js';
 import HUD from '../classes/HUD.js';
+import FogOfWar from '../classes/FogOfWar.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -44,6 +45,8 @@ export default class GameScene extends Phaser.Scene {
       new Phaser.Math.Vector2(120, 540)
     ]);
 
+    // Nevoeiro (profundidade 50/51) por cima do mapa e abaixo do HUD (100+)
+    this.nevoeiro = new FogOfWar(this, 800, 600, 50);
     this.hud = new HUD(this);
     this.input.keyboard.once('keydown-ESC', () => this.terminar());
   }
@@ -53,6 +56,9 @@ export default class GameScene extends Phaser.Scene {
 
     this.jogador.atualizar(tempo, delta);
     this.drone.atualizar(tempo, delta, this.jogador, this.fogos);
+
+    // Fusão sensorial: visão do socorrista + telemetria do drone
+    this.nevoeiro.atualizar(this.jogador, this.drone);
 
     // Resgatar vítimas (tecla E)
     this.pontuacao += this.jogador.tentarResgatar(this.vitimas);

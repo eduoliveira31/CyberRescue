@@ -57,3 +57,29 @@ Implementar o núcleo da jogabilidade cooperativa entre o socorrista e o drone i
 - **Finalidade:** gerar as classes `Rescuer`, `SmartDrone`, `Victim`, `HazardFire` e `HUD` e integrá-las na `GameScene`.
 - **Resultado:** mecânica cooperativa jogável com placeholders, a testar no browser.
 - **Decisões tomadas:** o código foi revisto pelo autor; a FSM e os parâmetros serão ajustados após testes.
+
+## Sessão 3 — 26 de novembro de 2026
+
+### Objetivo
+Implementar a Fusão Sensorial (Fog of War com telemetria partilhada pelo drone).
+
+### Atividades realizadas
+- Criação de `FogOfWar`: duas camadas de `RenderTexture` por cima do mapa e abaixo do HUD. A primeira é um nevoeiro permanente, apagado nas zonas exploradas. A segunda é uma sombra de memória, que só fica limpa onde se vê em tempo real.
+- Dois raios de visão: socorrista (110 px, visão direta) e drone (160 px, telemetria partilhada), com bordas suaves.
+- Integração na `GameScene`, com o HUD sempre por cima.
+
+### Problemas
+- No Phaser v4 as operações de desenho em texturas ficam em memória e só aparecem após `render()`.
+
+### Soluções
+- Consulta do código-fonte do Phaser 4.2.1 e chamada explícita de `render()` a cada frame.
+
+### Decisões
+- Zonas nunca exploradas ficam totalmente ocultas; as visitadas ficam sombreadas (55%).
+- Os raios são provisórios e serão afinados nos testes.
+
+### Declaração de Utilização de IA
+- **Ferramenta usada:** Claude Code (modelo Sonnet 5.5).
+- **Finalidade:** gerar a classe `FogOfWar` e integrá-la na `GameScene`.
+- **Resultado:** nevoeiro com visão partilhada, por testar no browser.
+- **Decisões tomadas:** o código foi revisto pelo autor; valores a ajustar após testes.
