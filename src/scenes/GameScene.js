@@ -28,6 +28,7 @@ export default class GameScene extends Phaser.Scene {
     this.salvasNivel = 0;
     this.totalGlobal = NIVEIS.reduce((soma, n) => soma + n.vitimas.length, 0);
 
+    this.desenharMapa();
     this.construirParedes();
 
     this.vitimas = this.nivel.vitimas.map((p) => {
@@ -57,7 +58,25 @@ export default class GameScene extends Phaser.Scene {
     this.hud = new HUD(this);
     this.input.keyboard.once('keydown-ESC', () => this.terminar(false));
 
+    // Som ambiente em loop, parado ao sair da cena
+    this.ambiente = this.sound.add('ambiente', { loop: true, volume: 0.35 });
+    this.ambiente.play();
+    this.events.once('shutdown', () => this.ambiente.stop());
+
     this.mostrarAviso(`Nível ${this.nivel.id}: ${this.nivel.nome}`, 2200);
+  }
+
+  // Desenha o chão e as paredes do nível com os tiles pixel-art (32x32 ampliados para 40x40)
+  desenharMapa() {
+    const textura = `tiles_n${this.nivel.id}`;
+    this.nivel.mapa.forEach((linha, l) => {
+      [...linha].forEach((celula, c) => {
+        const alternativo = (c * 7 + l * 13) % 3 === 0 ? 1 : 0;
+        const frame = (celula === '#' ? 2 : 0) + alternativo;
+        this.add.image(c * TAM_TILE + TAM_TILE / 2, l * TAM_TILE + TAM_TILE / 2, textura, frame)
+          .setDisplaySize(TAM_TILE, TAM_TILE);
+      });
+    });
   }
 
   // Cria as paredes agrupando tiles consecutivos de cada linha num só retângulo
@@ -70,9 +89,10 @@ export default class GameScene extends Phaser.Scene {
         let fim = c;
         while (fim < linha.length && linha[fim] === '#') fim++;
         const largura = (fim - c) * TAM_TILE;
+        // Corpo de colisão invisível; o aspeto vem dos tiles desenhados em desenharMapa()
         const parede = this.add.rectangle(
-          c * TAM_TILE + largura / 2, l * TAM_TILE + TAM_TILE / 2, largura, TAM_TILE, 0x4a5568
-        ).setStrokeStyle(1, 0x2d3748);
+          c * TAM_TILE + largura / 2, l * TAM_TILE + TAM_TILE / 2, largura, TAM_TILE
+        ).setVisible(false);
         this.physics.add.existing(parede, true);
         this.paredes.add(parede);
         c = fim;
@@ -102,7 +122,9 @@ export default class GameScene extends Phaser.Scene {
     this.nevoeiro.atualizar(this.jogador, this.drone);
 
     // Resgatar vítimas (tecla E)
-    this.pontuacao += this.jogador.tentarResgatar(this.vitimas);
+    const pontosResgate = this.jogador.tentarResgatar(this.vitimas);
+    if (pontosResgate > 0) this.sound.play('resgate', { volume: 0.7 });
+    this.pontuacao += pontosResgate;
     this.vitimas = this.vitimas.filter((v) => v.active);
     this.fogos = this.fogos.filter((f) => f.active);
     this.salvasNivel = this.totalNivel - this.vitimas.length;
@@ -110,7 +132,7 @@ export default class GameScene extends Phaser.Scene {
     // Dano ao tocar num foco de incêndio
     this.fogos.forEach((fogo) => {
       const dist = Phaser.Math.Distance.Between(this.jogador.x, this.jogador.y, fogo.x, fogo.y);
-      if (dist < 14 + 20 * fogo.scaleX) this.jogador.receberDano(fogo.dano, tempo);
+      if (dist < 14 + fogo.raio) this.jogador.receberDano(fogo.dano, tempo);
     });
 
     this.hud.atualizar({
@@ -136,6 +158,7 @@ export default class GameScene extends Phaser.Scene {
     this.terminado = true;
     this.jogador.body.setVelocity(0, 0);
     this.drone.body.setVelocity(0, 0);
+    this.sound.play('nivel', { volume: 0.7 });
     this.mostrarAviso(`Setor Limpo!\nA avançar para o Nível ${this.nivel.id + 1}...`, 1800);
     this.time.delayedCall(2300, () => {
       this.scene.restart({

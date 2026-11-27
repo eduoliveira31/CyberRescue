@@ -13,6 +13,7 @@ export default class GameOverScene extends Phaser.Scene {
 
   create() {
     const largura = this.scale.width;
+    this.sound.play(this.vitoria ? 'vitoria' : 'derrota', { volume: 0.7 });
     const titulo = this.vitoria ? 'MISSÃO CONCLUÍDA' : 'FALHA NA MISSÃO';
     const cor = this.vitoria ? '#68d391' : '#fc8181';
 

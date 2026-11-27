@@ -5,17 +5,22 @@ export const ESTADOS = {
   ASSIST: 'ASSIST'
 };
 
+// Cor aplicada ao sprite conforme o estado
 const CORES = {
-  PATROL: 0x4fd1c5,
-  EXTINGUISH: 0xed8936,
-  ASSIST: 0x9f7aea
+  PATROL: 0xffffff,
+  EXTINGUISH: 0xffb27a,
+  ASSIST: 0xc9a8ff
 };
 
-export default class SmartDrone extends Phaser.GameObjects.Arc {
+export default class SmartDrone extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y, pontosPatrulha) {
-    super(scene, x, y, 14, 0, 360, false, CORES.PATROL);
+    super(scene, x, y, 'drone', 0);
     scene.add.existing(this);
     scene.physics.add.existing(this);
+    this.anims.play('drone-voar');
+    this.setDepth(10);
+    this.proximoSomExtintor = 0;
+    this.tempoAtual = 0;
 
     this.estado = ESTADOS.PATROL;
     this.pontosPatrulha = pontosPatrulha;
@@ -36,6 +41,7 @@ export default class SmartDrone extends Phaser.GameObjects.Arc {
 
   // Ciclo principal: decidir o estado e executar o comportamento
   atualizar(tempo, delta, jogador, fogos) {
+    this.tempoAtual = tempo;
     if (jogador.pedidoAjuda) {
       jogador.pedidoAjuda = false;
       this.assistAte = tempo + this.duracaoChamada;
@@ -69,7 +75,7 @@ export default class SmartDrone extends Phaser.GameObjects.Arc {
   mudarEstado(novo) {
     if (novo === this.estado) return;
     this.estado = novo;
-    this.setFillStyle(CORES[novo]);
+    this.setTint(CORES[novo]);
     this.etiqueta.setText(novo);
   }
 
@@ -90,6 +96,7 @@ export default class SmartDrone extends Phaser.GameObjects.Arc {
     } else {
       this.body.setVelocity(0, 0);
       fogo.apagar(40 * delta / 1000);
+      this.tocarExtintor();
     }
   }
 
@@ -105,7 +112,17 @@ export default class SmartDrone extends Phaser.GameObjects.Arc {
       jogador.saude = Math.min(100, jogador.saude + 4 * segundos);
     }
     const perigo = this.fogoMaisPerto(jogador, fogos, this.raioProtecao);
-    if (perigo) perigo.apagar(40 * segundos);
+    if (perigo) {
+      perigo.apagar(40 * segundos);
+      this.tocarExtintor();
+    }
+  }
+
+  // Som do extintor, repetido a cada 350 ms enquanto está a apagar
+  tocarExtintor() {
+    if (this.tempoAtual < this.proximoSomExtintor) return;
+    this.scene.sound.play('extintor', { volume: 0.5 });
+    this.proximoSomExtintor = this.tempoAtual + 350;
   }
 
   fogoMaisPerto(origem, fogos, raio) {

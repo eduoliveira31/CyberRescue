@@ -135,3 +135,32 @@ Criar dois níveis em grelha inspirados em Viana do Castelo e a progressão comp
 - **Finalidade:** desenhar os layouts, implementar a progressão de níveis e atualizar o HUD e a GameOverScene.
 - **Resultado:** dois níveis jogáveis com vitória e derrota, ainda por testar no browser.
 - **Decisões tomadas:** código revisto pelo autor; dificuldade a ajustar após testes.
+
+## Sessão 6 — 27 de novembro de 2026
+
+### Objetivo
+Adicionar a camada visual em pixel-art animada e o sistema de áudio.
+
+### Atividades realizadas
+- Script Node.js temporário (só módulos nativos `fs` e `zlib`), executado fora do repositório, que gerou os PNG e WAV; não ficou no projeto.
+- Em `assets/images/`: spritesheets 32x32 com 4 frames do socorrista (capacete, colete refletor, caminhada), drone (4 rotores), fogo, vítima (a acenar) e tiles de chão/parede para o Nível 1 (ESTG-IPVC) e Nível 2 (calçada e fachadas da Praça da República).
+- Em `assets/audio/`: resgate, extintor, dano, passagem de nível, vitória, derrota e ambiente em loop (WAV curtos e leves).
+- Nova `PreloadScene` que carrega tudo, aplica filtro nearest e cria as animações; entidades passam a usar sprites e o `GameScene` desenha o mapa com os tiles.
+- Controlo de som no `HUD` (clique ou tecla M) com indicador Som ON/OFF.
+
+### Problemas
+- Não havia ferramentas de desenho nem bibliotecas de imagem/áudio disponíveis.
+
+### Soluções
+- Codificador PNG (com `zlib` e CRC) e sintetizador WAV escritos de raiz; pré-visualização ampliada para validar os sprites.
+
+### Decisões
+- Filtro nearest só nas texturas pixel-art, para não afetar o texto nem o nevoeiro suave.
+- Ambiente de 8 s com ciclos inteiros para o loop não ter emenda.
+- Mantidas as etiquetas de texto sobre as entidades para facilitar os testes.
+
+### Declaração de Utilização de IA
+- **Ferramenta usada:** Claude Code (modelo Sonnet 5.5).
+- **Finalidade:** gerar os assets gráficos e sonoros por código e integrá-los nas cenas e entidades.
+- **Resultado:** jogo com pixel-art animada e áudio, por testar no browser (sons e animações não foram ouvidos nem vistos a correr).
+- **Decisões tomadas:** assets revistos pelo autor; estilo e volumes ajustáveis.

@@ -1,12 +1,13 @@
 // Vítima a resgatar (placeholder: círculo amarelo)
-export default class Victim extends Phaser.GameObjects.Arc {
+export default class Victim extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y) {
-    super(scene, x, y, 12, 0, 360, false, 0xf6e05e);
+    super(scene, x, y, 'vitima', 0);
     scene.add.existing(this);
     scene.physics.add.existing(this, true);
+    this.anims.play('vitima-acenar');
 
     this.pontos = 100;
-    this.etiqueta = scene.add.text(x, y - 22, 'VÍTIMA [E]', {
+    this.etiqueta = scene.add.text(x, y - 24, 'VÍTIMA [E]', {
       fontFamily: 'monospace', fontSize: '11px', color: '#faf089'
     }).setOrigin(0.5).setDepth(5);
   }

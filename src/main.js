@@ -1,4 +1,5 @@
 // Ponto de entrada do jogo: configuração global do Phaser
+import PreloadScene from './scenes/PreloadScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
@@ -18,7 +19,7 @@ const config = {
     default: 'arcade',
     arcade: { gravity: { x: 0, y: 0 }, debug: false }
   },
-  scene: [MenuScene, GameScene, GameOverScene]
+  scene: [PreloadScene, MenuScene, GameScene, GameOverScene]
 };
 
 new Phaser.Game(config);
